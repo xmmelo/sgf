@@ -38,6 +38,7 @@ Variables
 z total costs
 Pload(i,t) actual load
 FlexUp(i,t)
+FlexDown(i,t)
 sumPload(t)
 binFlex(i,t)
 binaryFlex;
@@ -54,29 +55,26 @@ Equations
 BalanceEquation(i)
 calcLoad(i,t)
 totalCosts
-deltaFlex(i,t)
 calcFlexUp(i,t)
 calcFlexDown(i,t)
-calcLoadBinary(i,t)
+calcFlexDownBinary(i,t)
 sumConsumption(t)
 maxConsumption(t);
 
 * STEP 3
 * Equations description
 
-calcFlexUp(i,t) .. FlexUp(i,t) =g= DeltaP(i,t);
+calcFlexUp(i,t) .. FlexUp(i,t) =l= DeltaP(i,t);
 
-calcFlexDown(i,t) .. FlexDown(i,t) =l= DeltaP(i,t);
+calcFlexDown(i,t)$(ord(i) <= 2) .. FlexDown(i,t) =l= DeltaP(i,t);
 
-deltaFlex(i,t) .. binFlex(i,t) =e=  binaryFlex * DeltaP(i,t);                     
+calcFlexDownBinary(i,t)$(ord(i) >= 3) .. FlexDown(i,t) =e=  binaryFlex * DeltaP(i,t);                  
 
 sumConsumption(t) .. sumPload(t) =e= sum(i,Pload(i,t));
 
-maxConsumption(t) .. sumPload(t)=l= 850;
+maxConsumption(t) .. sumPload(t) =l= 850;
 
-calcLoad(i,t)$((ord(i)> 5) or (ord(i)< 3)) ..  Pload(i,t) =e= Pd(i,t)+Pd(i,t)*FlexUp(i,t)-Pd(i,t)*FlexDown(i,t);
-
-calcLoadBinary(i,t)$((ord(i) < 5 ) and (ord(i) > 3)) .. Pload(i,t) =e= Pd(i,t)+Pd(i,t)*binFlex(i,t)-Pd(i,t)*binFlex(i,t);
+calcLoad(i,t) ..  Pload(i,t) =e= Pd(i,t)+Pd(i,t)*FlexUp(i,t)-Pd(i,t)*FlexDown(i,t);
 
 BalanceEquation(i) .. sum(t,Pd(i,t)) =e= sum(t,Pload(i,t)) ;
 
